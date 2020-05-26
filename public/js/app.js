@@ -1977,23 +1977,25 @@ var apiUrl = 'http://test.loc/api/trades';
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+        var result;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _this.isBusy = true;
                 _context.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default.a.get('http://test.loc/api/trades').then(function (result) {
-                  return result.data.data;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default.a.get('http://localhost:8000/api/trades').then(function (result) {
+                  return result.data;
                 })["catch"](function () {
-                  return _this.isAlertshow = true;
+                  return _this.isAlertShow = true;
                 });
 
               case 3:
-                _this.items = _context.sent;
+                result = _context.sent;
+                _this.items = result.data;
                 _this.isBusy = false;
 
-              case 5:
+              case 6:
               case "end":
                 return _context.stop();
             }

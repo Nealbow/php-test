@@ -50,10 +50,11 @@
         methods: {
             async refresh() {
                 this.isBusy = true;
-                this.items = await axios
-                    .get('http://test.loc/api/trades')
-                    .then((result) => result.data.data)
-                    .catch(() => this.isAlertshow = true);
+                const result = await axios
+                    .get('http://localhost:8000/api/trades')
+                    .then((result) => result.data)
+                    .catch(() => this.isAlertShow = true);
+                this.items = result.data;
                 this.isBusy = false;
             }
         }

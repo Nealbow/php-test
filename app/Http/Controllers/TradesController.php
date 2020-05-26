@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use DateTime;
+use GuzzleHttp\Exception\RequestException;
+use http\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -26,8 +28,12 @@ class TradesController extends Controller
 {
     public function trades(Request $request)
     {
-        $response = Http::get("https://api.binance.com/api/v1/aggTrades?symbol=ETHBTC&limit=15");
-        if ($response->failed()) return response()->json(['success' => false], 400);
+        try {
+            $response = Http::get("https://api.binance.com/api/v1/aggTrades?symbol=ETHBTC&limit=15");
+        } catch (RequestException $e) {
+            return response()->json(['success' => false], 400);
+        }
+        if ($response->failed()) return response()->json(['success' => false, 'data' => []], 400);
         return [
             'success' => true,
             'data' => array_map('App\Http\Controllers\map_wallet_info', $response->json()),
