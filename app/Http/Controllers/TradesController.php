@@ -2,41 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use DateTime;
-use GuzzleHttp\Exception\RequestException;
-use http\Exception;
+use App\Http\Helpers\Trades;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
-
-function get_type($item) {
-    if ($item['m']) return 'Покупка';
-    return 'Продажа';
-}
-
-function map_wallet_info($item)
-{
-    return [
-        'time' => DateTime::createFromFormat('U', round($item['T']/1000))->format('l, d-M-Y G:i:s'),
-        'type' => get_type($item),
-        'price' => $item['p'],
-        'quantity' => $item['q']
-    ];
-}
 
 class TradesController extends Controller
 {
     public function trades(Request $request)
     {
         try {
-            $response = Http::get("https://api.binance.com/api/v1/aggTrades?symbol=ETHBTC&limit=15");
-        } catch (RequestException $e) {
-            return response()->json(['success' => false], 400);
+            $validated = $request->validate([
+                'wallet' => 'required|string',
+                'page' => 'required|integer|min:0|max:34'
+            ]);
+        } catch (\Exception $ex) {
+            return [
+                'success' => false,
+                'message' => 'Validation error'
+            ];
         }
-        if ($response->failed()) return response()->json(['success' => false, 'data' => []], 400);
+        $data = Trades::getWalletTrades($validated['wallet'], $validated['page']);
+        if ($data === false) {
+            return [
+                'success' => false,
+                'message' => 'Binance API error'
+            ];
+        }
         return [
             'success' => true,
-            'data' => array_map('App\Http\Controllers\map_wallet_info', $response->json()),
+            'page' => intval($validated['page']),
+            'data' => $data,
+            'totalRows' => 500
         ];
     }
 }

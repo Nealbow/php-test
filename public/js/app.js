@@ -1946,17 +1946,32 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 var apiUrl = 'http://test.loc/api/trades';
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
-    this.refresh();
+    this.refresh(1);
   },
   data: function data() {
     return {
       isBusy: false,
       isAlertShow: false,
       items: [],
+      errorMessage: '',
+      currentWallet: 'ETHBTC',
+      currentPage: 1,
+      pageSize: 15,
+      rows: 0,
       fields: [{
         key: 'time',
         label: 'Время'
@@ -1973,7 +1988,7 @@ var apiUrl = 'http://test.loc/api/trades';
     };
   },
   methods: {
-    refresh: function refresh() {
+    refresh: function refresh(page) {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
@@ -1983,25 +1998,54 @@ var apiUrl = 'http://test.loc/api/trades';
             switch (_context.prev = _context.next) {
               case 0:
                 _this.isBusy = true;
-                _context.next = 3;
-                return axios__WEBPACK_IMPORTED_MODULE_1___default.a.get('http://localhost:8000/api/trades').then(function (result) {
+                _this.isAlertShow = false;
+                _context.next = 4;
+                return axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("http://localhost:8000/api/trades?wallet=".concat(_this.currentWallet, "&page=").concat(page - 1)).then(function (result) {
                   return result.data;
-                })["catch"](function () {
-                  return _this.isAlertShow = true;
-                });
+                })["catch"](_this.setError);
 
-              case 3:
+              case 4:
                 result = _context.sent;
+
+                if (result) {
+                  _context.next = 8;
+                  break;
+                }
+
+                _this.isBusy = false;
+                return _context.abrupt("return");
+
+              case 8:
+                if (!(result.success === false)) {
+                  _context.next = 12;
+                  break;
+                }
+
+                _this.setError(result);
+
+                _this.isBusy = false;
+                return _context.abrupt("return");
+
+              case 12:
                 _this.items = result.data;
+                _this.rows = result.totalRows;
                 _this.isBusy = false;
 
-              case 6:
+              case 15:
               case "end":
                 return _context.stop();
             }
           }
         }, _callee);
       }))();
+    },
+    setWallet: function setWallet(wallet) {
+      this.currentWallet = wallet;
+      this.refresh(1);
+    },
+    setError: function setError(error) {
+      this.isAlertShow = true;
+      this.errorMessage = error.message;
     }
   }
 });
@@ -81016,11 +81060,26 @@ var render = function() {
     "div",
     { staticClass: "container" },
     [
-      _c("b-alert", { attrs: { show: _vm.isAlertShow, dismissible: "" } }, [
-        _vm._v("Возникла ошибка получения данных")
-      ]),
+      _c(
+        "b-alert",
+        {
+          attrs: { dismissible: "" },
+          model: {
+            value: _vm.isAlertShow,
+            callback: function($$v) {
+              _vm.isAlertShow = $$v
+            },
+            expression: "isAlertShow"
+          }
+        },
+        [
+          _vm._v(
+            "Возникла ошибка получения данных: " + _vm._s(_vm.errorMessage)
+          )
+        ]
+      ),
       _vm._v(" "),
-      _c("h3", { staticClass: "m-3" }, [_vm._v("ETHBTC")]),
+      _c("h3", { staticClass: "m-3" }, [_vm._v(_vm._s(_vm.currentWallet))]),
       _vm._v(" "),
       _c("b-table", {
         attrs: {
@@ -81052,7 +81111,68 @@ var render = function() {
         ])
       }),
       _vm._v(" "),
-      _c("b-button", { on: { click: _vm.refresh } }, [_vm._v("Обновить")])
+      _c("div", { staticClass: "d-flex" }, [
+        _c(
+          "div",
+          [
+            _c(
+              "b-button",
+              {
+                on: {
+                  click: function($event) {
+                    return _vm.refresh(_vm.currentPage)
+                  }
+                }
+              },
+              [_vm._v("Обновить")]
+            ),
+            _vm._v(" "),
+            _c(
+              "b-button",
+              {
+                on: {
+                  click: function($event) {
+                    return _vm.setWallet("ETHBTC")
+                  }
+                }
+              },
+              [_vm._v("ETHBTC")]
+            ),
+            _vm._v(" "),
+            _c(
+              "b-button",
+              {
+                on: {
+                  click: function($event) {
+                    return _vm.setWallet("LTCBTC")
+                  }
+                }
+              },
+              [_vm._v("LTCBTC")]
+            )
+          ],
+          1
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          { staticClass: "ml-auto" },
+          [
+            _c("b-pagination", {
+              attrs: { "per-page": _vm.pageSize, "total-rows": _vm.rows },
+              on: { input: _vm.refresh },
+              model: {
+                value: _vm.currentPage,
+                callback: function($$v) {
+                  _vm.currentPage = $$v
+                },
+                expression: "currentPage"
+              }
+            })
+          ],
+          1
+        )
+      ])
     ],
     1
   )
