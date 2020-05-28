@@ -18,11 +18,14 @@ cd php-test
 npm i
 composer i
 npm run prod
+```
+*Далее* нужно создать файл `.env` и скопировать в него содержимое `.env.example`
+После выполнить еще немного
+```
 php artisan key:generate
 php artisan serve
 ```
 
-*Дополнительно* нужно создать файл `.env` и скопировать в него содержимое `.env.example`
 
 Сервер будет развернут по адресу `localhost:8000`
 API находится по адресу `localhost:8000/api`
